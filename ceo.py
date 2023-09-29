@@ -52,7 +52,7 @@ proxy_frame = pandas.DataFrame(proxy_orders,
                                         "tariff", "platform_status", "cargo_status", "created_at", "proxy_client_id"])
 proxy_frame = proxy_frame.apply(lambda row: refactor_lo_code(row), axis=1)
 
-st.markdown(f"# :rainbow[CE Orders 2023-09-29]")
+st.markdown(f"# :rainbow[CE ORDERS COUNTER]")
 st.markdown("This is an app to **get a list of CE orders to be received through the mass-processing SC page**. "
             "To do so you need a list of LO- codes.")
 st.markdown("Here are the steps to get them correctly:")
