@@ -50,7 +50,7 @@ st.markdown("This is an app to **get a list of CE orders to be received through 
             "To do so you need a list of LO- codes.")
 st.markdown("Here are the steps to get them correctly:")
 st.markdown("1. Check **Bad address** solution in the proxy and fix all CE orders. :red[Not fixed orders do not have LO-codes]")
-st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, find the missing orders in proxy with "
+st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, find the missing orders in the proxy with "
             "**Find and fix** solution in the proxy and press **:green[Force sync Log Platform]** for each such order. To find such "
             "orders press on the column *lo_code*, so the orders are sorted and the missing codes are at the top. "
             "The other option is to use the filter **Show only missing orders**. :red[Note! It takes ~5 minutes to get LO- code for a newly geofixed order]")
