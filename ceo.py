@@ -46,7 +46,7 @@ proxy_frame = pandas.DataFrame(proxy_orders,
                                         "tariff", "platform_status", "cargo_status", "created_at", "proxy_client_id"])
 
 st.markdown(f"# CE Orders 2023-09-29")
-st.markdown("This is an to **get a list of CE orders to be received through the mass-processing SC page**. "
+st.markdown("This is an app to **get a list of CE orders to be received through the mass-processing SC page**. "
             "To do so you need a list of LO- codes.")
 st.markdown("Here are the steps to get them correctly:")
 st.markdown("1. Check **Bad address** solution and fix all CE orders. :red[Not fixed orders do not have LO-codes]")
