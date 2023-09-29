@@ -18,7 +18,7 @@ def init_connection():
 connection = init_connection()
 
 
-@st.cache_data(ttl=600)
+@st.cache_data(ttl=60)
 def get_historical_orders(query):
     with connection.cursor() as cursor:
         cursor.execute(query)
