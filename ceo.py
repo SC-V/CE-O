@@ -25,6 +25,12 @@ def get_historical_orders(query):
         return cursor.fetchall()
 
 
+def refactor_lo_code(row):
+    if not pandas.isna(row["lo_code"]):
+        row["lo_code"] = "LO-" + str(row["lo_code"])
+    return row
+    
+
 proxy_orders = get_historical_orders(rf"""
     SELECT 
         client_order_number,
@@ -44,6 +50,7 @@ proxy_orders = get_historical_orders(rf"""
 proxy_frame = pandas.DataFrame(proxy_orders,
                                columns=["barcode", "external_id", "lo_code", "request_id", "claim_id",
                                         "tariff", "platform_status", "cargo_status", "created_at", "proxy_client_id"])
+proxy_frame = proxy_frame.apply(lambda row: refactor_lo_code(row), axis=1)
 
 st.markdown(f"# CE Orders 2023-09-29")
 st.markdown("This is an app to **get a list of CE orders to be received through the mass-processing SC page**. "
