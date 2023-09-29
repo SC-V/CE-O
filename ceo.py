@@ -51,9 +51,8 @@ st.markdown("This is an app to **get a list of CE orders to be received through 
 st.markdown("Here are the steps to get them correctly:")
 st.markdown("1. Check **Bad address** solution in the proxy and fix all CE orders. :red[Not fixed orders do not have LO-codes]")
 st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, find the missing orders in the proxy with "
-            "**Find and fix** solution in the proxy and press **:green[Force sync Log Platform]** for each such order. To find such "
-            "orders press on the column *lo_code*, so the orders are sorted and the missing codes are at the top. "
-            "The other option is to use the filter **Show only missing orders**. :red[Note! It takes ~5 minutes to get LO- code for a newly geofixed order]")
+            "**Find and fix** solution in the proxy and press **:green[Force sync Log Platform]** for each such order. "
+            "To get the list of such orders use the filter **Show only missing orders** below. :red[Note! It takes ~5 minutes to get LO- code for a newly geofixed order]")
 st.markdown("3. Press **Reload data** button below, so the app reloads with an updated data")
 st.markdown("4. When there's no missing orders, download the report pressing **Download orders** button and make an "
             "upload file to post in /mass-processing page of SC. Don't forget to select **Accept orders**!")
