@@ -55,7 +55,7 @@ st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, 
             "To get a list of such orders use the filter **Show only missing orders** below. :red[Note! It takes ~5 minutes to get LO- code for a geofixed order]")
 st.markdown("3. Press **Reload data** button below, so the app reloads with an updated data")
 st.markdown("4. When there's no missing orders, download the report pressing **Download orders** button and make an "
-            "upload file to post in /mass-processing page of SC. Don't forget to select **Accept orders**!")
+            "upload file to post in /mass-processing page of SC. Don't forget to select **Accept sortables** option!")
 st.divider()
 
 total_orders = len(proxy_frame)
