@@ -5,9 +5,13 @@ import io
 import datetime
 from pytz import timezone
 
-st.set_page_config(page_title="CE orders – 2023-09-29", layout="wide")
+st.set_page_config(page_title=f"CE orders {datetime.datetime.now(timezone('America/Santiago')).strftime('%Y-%m-%d')}",
+                   layout="wide")
 
 FILE_BUFFER_REPORT = io.BytesIO()
+BATCH: int = 1
+TODAY = datetime.datetime.now(timezone("America/Santiago")).strftime("%Y-%m-%d")
+YESTERDAY = (datetime.datetime.now(timezone("America/Santiago")) - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
 
 @st.cache_resource
@@ -44,18 +48,30 @@ proxy_orders = get_historical_orders(rf"""
         created_at AT TIME ZONE 'America/Santiago',
         client_id
     FROM orders
-    WHERE client_id = '8FCBA125-637E-4365-95C4-17E5659EA485' AND created_at >= '2023-09-28 12:00:00';
+    WHERE client_id = '8FCBA125-637E-4365-95C4-17E5659EA485' 
+    AND created_at AT TIME ZONE 'America/Santiago' >= '{YESTERDAY} 00:00:00'
+    ORDER BY created_at ASC;
     """)
 
 proxy_frame = pandas.DataFrame(proxy_orders,
                                columns=["barcode", "external_id", "lo_code", "request_id", "claim_id",
                                         "tariff", "platform_status", "cargo_status", "created_at", "proxy_client_id"])
+proxy_frame["prev_created_at"] = proxy_frame["created_at"].shift(1)
 proxy_frame = proxy_frame.apply(lambda row: refactor_lo_code(row), axis=1)
+for index, row in proxy_frame.iterrows():
+    time_delta = (row["created_at"] - row["prev_created_at"]).total_seconds()
+    if time_delta <= 3600.0 or pandas.isna(row["prev_created_at"]):
+        proxy_frame.loc[index, "batch"] = BATCH
+    else:
+        BATCH += 1
+        proxy_frame.loc[index, "batch"] = BATCH
 
-st.markdown(f"# :rainbow[CE ORDERS COUNTER]")
+st.markdown(f"# CE Orders – {TODAY}")
 st.markdown("This is an app to **get a list of CE orders to be received through the mass-processing SC page**. "
             "To do so you need a list of LO- codes.")
 st.markdown("Here are the steps to get them correctly:")
+st.markdown("0. CE load orders in batches throughout the day. Use **Select batch** to review orders by those batches. "
+            ":red[Keep in mind: batches numbers are recalculated automatically]")
 st.markdown("1. Check **Bad address** solution in the proxy and fix all CE orders. :red[Not fixed orders do not have LO-codes]")
 st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, find the missing orders in the proxy with "
             "**Find and fix** solution and press **:green[Force sync Log Platform]** for each such order. "
@@ -68,31 +84,37 @@ st.divider()
 total_orders = len(proxy_frame)
 missing_orders = len(proxy_frame[proxy_frame["lo_code"].isna()])
 
-col_total, col_missing, col_show_only_missing, _ = st.columns(4)
+col_total, col_missing, col_select_batch, _ = st.columns(4)
 with col_total:
     total_order_metric = st.metric("Total orders #", total_orders)
 with col_missing:
     missing_orders_metric = st.metric("Missing orders #", missing_orders)
-with col_show_only_missing:
-    show_only_missing_orders = st.checkbox('Show only missing orders')
+with col_select_batch:
+    selected_batches = st.multiselect('Select batch', proxy_frame["batch"].unique()) if total_orders > 0 else None
+show_only_missing_orders = st.checkbox('Show only missing orders')
+
+if selected_batches:
+    proxy_frame = proxy_frame[proxy_frame['batch'].isin(selected_batches)]
 
 if show_only_missing_orders:
     proxy_frame = proxy_frame[proxy_frame["lo_code"].isna()]
 
-st.dataframe(proxy_frame)
+if total_orders > 0:
+    st.dataframe(proxy_frame)
+
+    with pandas.ExcelWriter(FILE_BUFFER_REPORT, engine='xlsxwriter') as writer:
+        proxy_frame.to_excel(writer, sheet_name='ce_pick_report')
+        writer.close()
+
+        st.download_button(
+            label="Download orders",
+            data=FILE_BUFFER_REPORT,
+            file_name=f"ce_orders_{TODAY}.xlsx",
+            mime="application/vnd.ms-excel"
+        )
+else:
+    st.info("There are no orders for this period")
 
 if st.button("Reload data", type="primary"):
     st.cache_data.clear()
     st.experimental_rerun()
-
-with pandas.ExcelWriter(FILE_BUFFER_REPORT, engine='xlsxwriter') as writer:
-    proxy_frame.to_excel(writer, sheet_name='ce_pick_report')
-    writer.close()
-
-    TODAY = datetime.datetime.now(timezone("America/Santiago")).strftime("%Y-%m-%d")
-    st.download_button(
-        label="Download orders",
-        data=FILE_BUFFER_REPORT,
-        file_name=f"ce_orders_{TODAY}.xlsx",
-        mime="application/vnd.ms-excel"
-    )
