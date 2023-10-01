@@ -71,6 +71,7 @@ st.markdown("This is an app to **get a list of CE orders to be received through 
             "To do so you need a list of LO- codes.")
 st.markdown("Here are the steps to get them correctly:")
 st.markdown("0. CE load orders in batches throughout the day. Use **Select batch** to review orders by those batches. "
+            "The orders are considered to be in 1 batch if the time between their creation is less than 1 hour. "
             ":red[Keep in mind: batches numbers are recalculated automatically]")
 st.markdown("1. Check **Bad address** solution in the proxy and fix all CE orders. :red[Not fixed orders do not have LO-codes]")
 st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, find the missing orders in the proxy with "
