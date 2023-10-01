@@ -80,6 +80,7 @@ st.markdown("2. Check the app. If the metric **Missing LO codes** is not **0**, 
 st.markdown("3. Press **Reload data** button below, so the app reloads with an updated data")
 st.markdown("4. When there's no missing orders, download the report pressing **Download orders** button and make an "
             "upload file to post in /mass-processing page of SC. Don't forget to select **Accept sortables** option!")
+st.markdown("5. :red[Keep in mind that **Accept sortables** creates claims in the selected bucket immediately. Mind the timings!]")
 st.divider()
 
 total_orders = len(proxy_frame)
