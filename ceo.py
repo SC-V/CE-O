@@ -11,7 +11,7 @@ st.set_page_config(page_title=f"CE orders {datetime.datetime.now(timezone('Ameri
 FILE_BUFFER_REPORT = io.BytesIO()
 BATCH: int = 1
 TODAY = datetime.datetime.now(timezone("America/Santiago")).strftime("%Y-%m-%d")
-YESTERDAY = (datetime.datetime.now(timezone("America/Santiago")) - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+YESTERDAY = (datetime.datetime.now(timezone("America/Santiago")) - datetime.timedelta(days=5)).strftime("%Y-%m-%d")
 
 
 @st.cache_resource
