@@ -86,7 +86,7 @@ st.divider()
 total_orders = len(proxy_frame)
 missing_orders = len(proxy_frame[proxy_frame["lo_code"].isna()])
 
-col_total, col_missing, col_select_batch, _ = st.columns(4)
+col_total, col_missing, col_selected_orders, col_select_batch = st.columns(4)
 with col_total:
     total_order_metric = st.metric("Total orders #", total_orders)
 with col_missing:
@@ -103,6 +103,8 @@ if show_only_missing_orders:
 
 if total_orders > 0:
     st.dataframe(proxy_frame)
+    with col_selected_orders:
+        selected_orders_metric = st.metric("Selected orders #", len(proxy_frame))
 
     with pandas.ExcelWriter(FILE_BUFFER_REPORT, engine='xlsxwriter') as writer:
         proxy_frame.to_excel(writer, sheet_name='ce_pick_report')
