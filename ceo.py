@@ -84,13 +84,10 @@ st.markdown("5. :red[Keep in mind that **Accept sortables** creates claims in th
 st.divider()
 
 total_orders = len(proxy_frame)
-missing_orders = len(proxy_frame[proxy_frame["lo_code"].isna()])
 
 col_total, col_missing, col_selected_orders, col_select_batch = st.columns(4)
 with col_total:
     total_order_metric = st.metric("Total orders #", total_orders)
-with col_missing:
-    missing_orders_metric = st.metric("Missing orders #", missing_orders)
 with col_select_batch:
     selected_batches = st.multiselect('Select batch', proxy_frame["batch"].unique()) if total_orders > 0 else None
 show_only_missing_orders = st.checkbox('Show only missing orders')
@@ -103,9 +100,11 @@ if show_only_missing_orders:
 
 if total_orders > 0:
     st.dataframe(proxy_frame)
+    missing_orders = len(proxy_frame[proxy_frame["lo_code"].isna()])
     with col_selected_orders:
         selected_orders_metric = st.metric("Selected orders #", len(proxy_frame))
-
+    with col_missing:
+        missing_orders_metric = st.metric("Missing orders #", missing_orders)
     with pandas.ExcelWriter(FILE_BUFFER_REPORT, engine='xlsxwriter') as writer:
         proxy_frame.to_excel(writer, sheet_name='ce_pick_report')
         writer.close()
