@@ -142,7 +142,7 @@ if st.button("Reload data", type="primary"):
     st.cache_data.clear()
     st.rerun()
 
-with st.expander("See explanation"):
+with st.expander("Experimental mass force sync platform"):
     st.markdown(f":red[This is an experimental feature! Click only once and wait for the completion. Don't refresh the page! It's slow, but it allow to force sync all selected missing orders (check **Only missing orders** to enable).]")
     if st.button("Force sync orders", disabled=False if show_only_missing_orders else True):
         for index, row in proxy_frame.iterrows():
