@@ -49,7 +49,7 @@ def refactor_lo_code(row):
 async def force_sync_platform(proxy_frame: pandas.DataFrame):
     async with semaphore:
         aiohttp_client = aiohttp.ClientSession()
-        msg = st.toast(f"Syncing {len(proxy_frame)} orders")
+        msg = st.toast(f"Syncing {len(proxy_frame)} orders. Wait for the page to reload")
         tasks = [aiohttp_client.post(SYNC_URL, data=json.dumps({"id": order_id}),
                                      headers={'Content-Type': 'application/json',
                                               'Accept-Language': 'en',
