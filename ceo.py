@@ -13,6 +13,10 @@ BATCH: int = 1
 TODAY = datetime.datetime.now(timezone("America/Santiago")).strftime("%Y-%m-%d")
 YESTERDAY = (datetime.datetime.now(timezone("America/Santiago")) - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
 
+SYNC_URL = st.secrets["SYNC_URL"]
+SYNC_REFERER = st.secrets["SYNC_REFERER"]
+force_sync_creds = st.secrets["SYNC_KEY"]
+
 
 @st.cache_resource
 def init_connection():
@@ -33,7 +37,21 @@ def refactor_lo_code(row):
     if not pandas.isna(row["lo_code"]):
         row["lo_code"] = "LO-" + str(row["lo_code"])
     return row
-    
+
+def force_sync_platform(row):
+    order_id = row["proxy_order_id"]
+    payload = json.dumps({"id": order_id})
+    headers = {
+        'Content-Type': 'application/json',
+        'Accept-Language': 'en',
+        'Authorization': force_sync_creds,
+        'Referer': f'{SYNC_REFERER}{order_id}'
+    }
+    msg = st.toast(f"Syncing order {row['barcode']}")
+    response = requests.request("POST", SYNC_URL, headers=headers, data=payload)
+    msg.toast(f"Syncing order {row['barcode']} + {response.status_code}")
+    return
+  
 
 proxy_orders = get_historical_orders(rf"""
     SELECT 
@@ -120,4 +138,12 @@ else:
 
 if st.button("Reload data", type="primary"):
     st.cache_data.clear()
-    st.experimental_rerun()
+    st.rerun()
+
+with st.expander("See explanation"):
+    st.markdown(f":red[This is an experimental feature! Click only once and wait for the completion. Don't refresh the page! It's slow, but it allow to force sync all selected missing orders (check **Only missing orders** to enable).]")
+    if st.button("Force sync orders", disabled=False if show_only_missing_orders else True):
+        for index, row in proxy_frame.iterrows():
+            force_sync_platform(row)
+        st.cache_data.clear()
+        st.rerun()
