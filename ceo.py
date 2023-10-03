@@ -3,6 +3,8 @@ import pandas
 import psycopg2
 import io
 import datetime
+import requests
+import json
 from pytz import timezone
 
 st.set_page_config(page_title=f"CE orders {datetime.datetime.now(timezone('America/Santiago')).strftime('%Y-%m-%d')}",
