@@ -66,6 +66,7 @@ proxy_orders = get_historical_orders(rf"""
         logistic_status,
         claim_status,
         created_at AT TIME ZONE 'America/Santiago',
+        id,
         client_id
     FROM orders
     WHERE client_id = '8FCBA125-637E-4365-95C4-17E5659EA485' 
@@ -75,7 +76,7 @@ proxy_orders = get_historical_orders(rf"""
 
 proxy_frame = pandas.DataFrame(proxy_orders,
                                columns=["barcode", "external_id", "lo_code", "request_id", "claim_id",
-                                        "tariff", "platform_status", "cargo_status", "created_at", "proxy_client_id"])
+                                        "tariff", "platform_status", "cargo_status", "created_at", "proxy_order_id", "proxy_client_id"])
 proxy_frame["prev_created_at"] = proxy_frame["created_at"].shift(1)
 proxy_frame = proxy_frame.apply(lambda row: refactor_lo_code(row), axis=1)
 for index, row in proxy_frame.iterrows():
