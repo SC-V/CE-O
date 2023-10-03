@@ -154,7 +154,7 @@ if st.button("Reload data", type="primary"):
     st.cache_data.clear()
     st.rerun()
 
-with st.expander("Mass force sync platform"):
+with st.expander("🔄 Mass force sync platform"):
     st.markdown(f":green[Click only once and wait for the completion. Don't refresh the page until completed! It allows to sync all selected missing orders instead of clicking 1 by 1 (check **Show only missing orders** option to enable).]")
     if st.button("Force sync orders", disabled=False if show_only_missing_orders else True):
         asyncio.run(force_sync_platform(proxy_frame))
