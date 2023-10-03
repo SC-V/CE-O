@@ -4,6 +4,8 @@ import psycopg2
 import io
 import datetime
 import requests
+import asyncio
+import aiohttp
 import json
 from pytz import timezone
 
@@ -19,6 +21,9 @@ SYNC_URL = st.secrets["SYNC_URL"]
 SYNC_REFERER = st.secrets["SYNC_REFERER"]
 force_sync_creds = st.secrets["SYNC_KEY"]
 
+loop = asyncio.new_event_loop()
+asyncio.set_event_loop(loop)
+semaphore = asyncio.Semaphore(10)
 
 @st.cache_resource
 def init_connection():
@@ -40,18 +45,24 @@ def refactor_lo_code(row):
         row["lo_code"] = "LO-" + str(row["lo_code"])
     return row
 
-def force_sync_platform(row):
-    order_id = row["proxy_order_id"]
-    payload = json.dumps({"id": order_id})
-    headers = {
-        'Content-Type': 'application/json',
-        'Accept-Language': 'en',
-        'Authorization': force_sync_creds,
-        'Referer': f'{SYNC_REFERER}{order_id}'
-    }
-    msg = st.toast(f"Syncing order {row['barcode']}")
-    response = requests.request("POST", SYNC_URL, headers=headers, data=payload)
-    msg.toast(f"Syncing order {row['barcode']} + {response.status_code}")
+
+async def force_sync_platform(proxy_frame: pandas.DataFrame):
+    async with semaphore:
+        aiohttp_client = aiohttp.ClientSession()
+        msg = st.toast(f"Syncing {len(proxy_frame)} orders")
+        tasks = [aiohttp_client.post(SYNC_URL, data=json.dumps({"id": order_id}),
+                                     headers={'Content-Type': 'application/json',
+                                              'Accept-Language': 'en',
+                                              'Authorization': force_sync_creds,
+                                              'Referer': f'{SYNC_REFERER}{order_id}'
+                                              },
+                                     ssl=False
+                                     )
+                 for order_id
+                 in proxy_frame["proxy_order_id"].unique()]
+        await asyncio.gather(*tasks)
+        await aiohttp_client.close()
+        msg.toast(f"Sync completed")
     return
   
 
@@ -146,7 +157,6 @@ if st.button("Reload data", type="primary"):
 with st.expander("Experimental mass force sync platform"):
     st.markdown(f":red[This is an experimental feature! Click only once and wait for the completion. Don't refresh the page! It's slow, but it allow to force sync all selected missing orders (check **Only missing orders** to enable).]")
     if st.button("Force sync orders", disabled=False if show_only_missing_orders else True):
-        for index, row in proxy_frame.iterrows():
-            force_sync_platform(row)
+        asyncio.run(force_sync_platform(proxy_frame))
         st.cache_data.clear()
         st.rerun()
