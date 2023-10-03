@@ -1,3 +1,4 @@
 psycopg2-binary==2.9.7
 openpyxl==3.1.2
+aiohttp
 xlsxwriter
